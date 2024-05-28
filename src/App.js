@@ -1,10 +1,11 @@
-// app.js
+// App.js
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { auth } from './config/firebase';
 import { signOutUser } from './config/auth/auth';
 import AddBook from './components/AddBook';
 import BookSuggestions from './components/BookSuggestions';
+import BooksRead from './components/BookRead';
 import ManageLibrary from './components/ManageLibrary';
 import LoginForm from './components/LoginForm';
 
@@ -78,7 +79,12 @@ function App() {
           <div className="App container mt-4">
             {showAddBook && <AddBook />}
             {showManageLibrary && <ManageLibrary />}
-            {!showAddBook && !showManageLibrary && <BookSuggestions />}
+            {!showAddBook && !showManageLibrary && (
+              <>
+                <BookSuggestions />
+                <BooksRead />
+              </>
+            )}
           </div>
         </div>
       )}

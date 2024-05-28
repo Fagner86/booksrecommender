@@ -34,9 +34,15 @@ function ManageLibrary() {
     }
   };
 
-  const handleAddBookToLibrary = (book) => {
+  const handleAddBookToLibrary = async (book) => {
     console.log('Adding book to library:', book);
-    // Adicione lógica para salvar o livro no banco de dados aqui
+      try {
+        // Faz a requisição POST para adicionar o livro ao acervo
+        const response = await axios.post(process.env.REACT_APP_BOOKS_POST, book);
+        console.log('Livro adicionado com sucesso:', response.data);
+      } catch (error) {
+        console.error('Erro ao adicionar livro ao acervo:', error);
+      }
   };
 
   const fetchGoogleBooksData = async (title) => {

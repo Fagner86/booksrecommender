@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { auth } from '../config/firebase';
 
 function AddBook() {
   const [title, setTitle] = useState('');
@@ -8,15 +9,16 @@ function AddBook() {
   const [library, setLibrary] = useState([]);
 
   useEffect(() => {
-    // Fetch library data from your database or API
-    fetchLibrary();
+    fetchLibrary(); // Fetch library data from the server
   }, []);
 
   const fetchLibrary = async () => {
-    // Substitua com a lógica para buscar os dados do acervo da sua biblioteca
-    // Exemplo fictício:
-    const response = await axios.get('');
-    setLibrary(response.data);
+    try {
+      const response = await axios.get(process.env.REACT_APP_BOOKS_GET);
+      setLibrary(response.data);
+    } catch (error) {
+      console.error('Error fetching library:', error);
+    }
   };
 
   const handleSearch = (e) => {
@@ -27,12 +29,30 @@ function AddBook() {
     setSearchResults(results);
   };
 
-  const handleAddBook = (book) => {
-    console.log('Marking book as read:', book);
-    // Adicione lógica para marcar o livro como lido no banco de dados aqui
-    setSelectedBook(book);
-    setTitle('');
-    setSearchResults([]);
+  const handleAddBookToRead = async (book) => {
+    const user = auth.currentUser;
+    if (user) {
+      const email = user.email;
+      const { title, authors, description, imageLinks, categories } = book;
+      const newBook = {
+        title,
+        author: authors ? authors.join(', ') : 'Desconhecido',
+        description: description || 'Sem descrição',
+        image: imageLinks ? imageLinks.thumbnail : 'Sem imagem',
+        genre: categories ? categories.join(', ') : 'Desconhecido'
+      };
+      try {
+        await axios.post(process.env.REACT_APP_BOOKSREAD_POST, { email, book: newBook });
+        console.log('Livro adicionado aos livros lidos:', newBook);
+        setSelectedBook(newBook);
+        setTitle('');
+        setSearchResults([]);
+      } catch (error) {
+        console.error('Erro ao adicionar livro aos livros lidos:', error);
+      }
+    } else {
+      console.error('Usuário não autenticado');
+    }
   };
 
   return (
@@ -61,6 +81,7 @@ function AddBook() {
                 <th>Título</th>
                 <th>Autor</th>
                 <th>Descrição</th>
+                <th>Gênero</th>
                 <th>Ação</th>
               </tr>
             </thead>
@@ -68,14 +89,15 @@ function AddBook() {
               {searchResults.map((book, index) => (
                 <tr key={index}>
                   <td>{book.title}</td>
-                  <td>{book.author}</td>
+                  <td>{book.authors ? book.authors.join(', ') : 'Desconhecido'}</td>
                   <td>{book.description?.substring(0, 100) || 'Sem descrição'}</td>
+                  <td>{book.categories ? book.categories.join(', ') : 'Desconhecido'}</td>
                   <td>
                     <button
                       className="btn btn-success"
-                      onClick={() => handleAddBook(book)}
+                      onClick={() => handleAddBookToRead(book)}
                     >
-                      Marcar como Lido
+                      Adicionar aos Livros Lidos
                     </button>
                   </td>
                 </tr>
@@ -91,6 +113,9 @@ function AddBook() {
           <p><strong>Título:</strong> {selectedBook.title}</p>
           <p><strong>Autor:</strong> {selectedBook.author}</p>
           <p><strong>Descrição:</strong> {selectedBook.description}</p>
+          <p><strong>Gênero:</strong> {selectedBook.genre}</p>
+          <p><strong>Imagem:</strong></p>
+          {selectedBook.image !== 'Sem imagem' && <img src={selectedBook.image} alt={selectedBook.title} />}
         </div>
       )}
     </div>
