@@ -14,7 +14,7 @@ function BookSuggestions() {
 
   return (
     <div className="mt-4">
-      <h2>Sugestões de Lívros para Ler Com base nos Seus livros lidos</h2>
+      <h2>Sugestões de Lívros para Ler Com base nos livros que você já leu</h2>
       <ul className="list-group">
         {suggestions.map((book, index) => (
           <li key={index} className="list-group-item">

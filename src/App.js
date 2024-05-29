@@ -7,12 +7,15 @@ import AddBook from './components/AddBook';
 import BookSuggestions from './components/BookSuggestions';
 import BooksRead from './components/BookRead';
 import ManageLibrary from './components/ManageLibrary';
+import LibraryBooks from './components/LibraryBooks';
 import LoginForm from './components/LoginForm';
 
 function App() {
   const [user, setUser] = useState(null);
   const [showAddBook, setShowAddBook] = useState(false);
   const [showManageLibrary, setShowManageLibrary] = useState(false);
+  const [showLibraryBooks, setShowLibraryBooks] = useState(false);
+
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -24,11 +27,20 @@ function App() {
   const toggleAddBookForm = () => {
     setShowAddBook(!showAddBook);
     setShowManageLibrary(false);
+    setShowLibraryBooks(false);
+
   };
 
   const toggleManageLibrary = () => {
     setShowManageLibrary(!showManageLibrary);
     setShowAddBook(false);
+    setShowLibraryBooks(false);
+
+  };
+    const toggleLibraryBooks = () => {
+    setShowLibraryBooks(!showLibraryBooks);
+    setShowAddBook(false);
+    setShowManageLibrary(false);
   };
 
   const handleLogin = () => {
@@ -67,6 +79,12 @@ function App() {
                       {showManageLibrary ? 'Fechar' : 'Gerenciar Biblioteca'}
                     </button>
                   </li>
+                  <li className="nav-item flex-fill">
+                    <button className="btn btn-outline-primary w-100" onClick={toggleLibraryBooks}>
+                      {showLibraryBooks ? 'Fechar' : 'Ver Livros da Biblioteca'}
+                    </button>
+                  </li>
+
                   <li className="nav-item">
                     <button className="btn btn-outline-primary" onClick={signOutUser}>
                       Sair
@@ -79,7 +97,8 @@ function App() {
           <div className="App container mt-4">
             {showAddBook && <AddBook />}
             {showManageLibrary && <ManageLibrary />}
-            {!showAddBook && !showManageLibrary && (
+            {showLibraryBooks && <LibraryBooks />}
+            {!showAddBook && !showManageLibrary && !showLibraryBooks && (
               <>
                 <BookSuggestions />
                 <BooksRead />
