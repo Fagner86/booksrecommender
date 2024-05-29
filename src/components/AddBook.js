@@ -13,11 +13,9 @@ function AddBook() {
   }, []);
 
   const fetchLibrary = async () => {
-    const booksServerUrl = process.env.BOOKS_SERVER_URL;
-
     try {
-
-      const response = await axios.get(`${booksServerUrl}/books`);
+      
+      const response = await axios.get('https://books-server-6x8r.onrender.com/books');
       setLibrary(response.data);
     } catch (error) {
       console.error('Error fetching library:', error);
@@ -34,8 +32,6 @@ function AddBook() {
 
   const handleAddBookToRead = async (book) => {
     const user = auth.currentUser;
-    const booksServerUrl = process.env.BOOKS_SERVER_URL;
-
     if (user) {
       const email = user.email;
       const { title, authors, description, imageLinks, categories } = book;
@@ -47,7 +43,7 @@ function AddBook() {
         genre: categories ? categories.join(', ') : 'Desconhecido'
       };
       try {
-        await axios.post(`${booksServerUrl}/booksread`, { email, book: newBook });
+        await axios.post('https://books-server-6x8r.onrender.com/booksread', { email, book: newBook });
         console.log('Livro adicionado aos livros lidos:', newBook);
         setSelectedBook(newBook);
         setTitle('');

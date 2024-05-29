@@ -16,9 +16,8 @@ function BooksRead() {
         const user = auth.currentUser;
         if (user) {
             const email = user.email;
-            const booksServerUrl = process.env.BOOKS_SERVER_URL;
             try {
-                const response = await axios.get(`${booksServerUrl}/booksread/${email}`);
+                const response = await axios.get(`https://books-server-6x8r.onrender.com/booksread/${email}`);
                 setBooksRead(response.data);
             } catch (error) {
                 console.error('Erro ao buscar livros lidos:', error);

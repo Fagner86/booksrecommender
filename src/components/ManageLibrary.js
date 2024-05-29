@@ -36,11 +36,9 @@ function ManageLibrary() {
 
   const handleAddBookToLibrary = async (book) => {
     console.log('Adding book to library:', book);
-    const booksServerUrl = process.env.BOOKS_SERVER_URL;
-
       try {
         // Faz a requisição POST para adicionar o livro ao acervo
-        const response = await axios.post(`${booksServerUrl}/books`, book);
+        const response = await axios.post('https://books-server-6x8r.onrender.com/books', book);
         console.log('Livro adicionado com sucesso:', response.data);
       } catch (error) {
         console.error('Erro ao adicionar livro ao acervo:', error);
