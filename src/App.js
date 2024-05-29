@@ -1,4 +1,4 @@
-// App.js
+// components/App.js
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { auth } from './config/firebase';
@@ -16,7 +16,6 @@ function App() {
   const [showManageLibrary, setShowManageLibrary] = useState(false);
   const [showLibraryBooks, setShowLibraryBooks] = useState(false);
 
-
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       setUser(user);
@@ -28,16 +27,15 @@ function App() {
     setShowAddBook(!showAddBook);
     setShowManageLibrary(false);
     setShowLibraryBooks(false);
-
   };
 
   const toggleManageLibrary = () => {
     setShowManageLibrary(!showManageLibrary);
     setShowAddBook(false);
     setShowLibraryBooks(false);
-
   };
-    const toggleLibraryBooks = () => {
+
+  const toggleLibraryBooks = () => {
     setShowLibraryBooks(!showLibraryBooks);
     setShowAddBook(false);
     setShowManageLibrary(false);
@@ -69,22 +67,28 @@ function App() {
               </button>
               <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav flex-fill">
-                  <li className="nav-item active flex-fill">
-                    <button className="btn btn-outline-primary w-100" onClick={toggleAddBookForm}>
-                      {showAddBook ? 'Fechar' : 'Adicionar livro que já Leu'}
-                    </button>
-                  </li>
-                  <li className="nav-item flex-fill">
-                    <button className="btn btn-outline-primary w-100" onClick={toggleManageLibrary}>
-                      {showManageLibrary ? 'Fechar' : 'Gerenciar Biblioteca'}
-                    </button>
-                  </li>
+                  {!user.email.endsWith('@alu.uern.br') && (
+                    <li className="nav-item active flex-fill">
+                      <button className="btn btn-outline-primary w-100" onClick={toggleAddBookForm}>
+                        {showAddBook ? 'Fechar' : 'Adicionar livro que já Leu'}
+                      </button>
+                    </li>
+                  )}
+                  {user.email.endsWith('@alu.uern.br') && (
+                    <li className="nav-item flex-fill">
+                      <button className="btn btn-outline-primary w-100" onClick={toggleManageLibrary}>
+                        {showManageLibrary ? 'Fechar' : 'Gerenciar Biblioteca'}
+                      </button>
+                    </li>
+                  )}
+                  { !user.email.endsWith('@alu.uern.br') && (
+
                   <li className="nav-item flex-fill">
                     <button className="btn btn-outline-primary w-100" onClick={toggleLibraryBooks}>
                       {showLibraryBooks ? 'Fechar' : 'Ver Livros da Biblioteca'}
                     </button>
                   </li>
-
+                    )}
                   <li className="nav-item">
                     <button className="btn btn-outline-primary" onClick={signOutUser}>
                       Sair
@@ -100,8 +104,17 @@ function App() {
             {showLibraryBooks && <LibraryBooks />}
             {!showAddBook && !showManageLibrary && !showLibraryBooks && (
               <>
-                <BookSuggestions />
-                <BooksRead />
+                {!user.email.endsWith('@alu.uern.br') && (
+                  <BookSuggestions> </BookSuggestions>
+                )}
+                {!user.email.endsWith('@alu.uern.br') && (
+                  <BooksRead />
+                )}
+                {user.email.endsWith('@alu.uern.br') && (
+                  <LibraryBooks/>
+                )}
+
+
               </>
             )}
           </div>
