@@ -1,7 +1,9 @@
 import React from 'react';
 import { signInWithGoogle } from '../config/auth/auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBook } from '@fortawesome/free-solid-svg-icons';
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import imageLogo from '../assets/image_logo.jpeg'; // Certifique-se de que o caminho está correto
 
 const LoginForm = ({ onLogin }) => {
   const handleGoogleLogin = () => {
@@ -12,14 +14,18 @@ const LoginForm = ({ onLogin }) => {
   return (
     <div className="container mt-5">
       <div className="row justify-content-center">
-        <div className="col-md-8">
-          <div className="text-center p-4 bg-light border rounded">
-            <FontAwesomeIcon icon={faBook} style={{ fontSize: '100px', marginBottom: '20px' }} />
-            <h2>Login</h2>
-            <p>Por favor, faça login para acessar o Book Recommender.</p>
-            <button className="btn btn-primary mb-3" onClick={handleGoogleLogin}>
-             Entrar com Google
-            </button>
+        <div className="col-md-5">
+          <div className="card bg-dark text-dark">
+            <img src={imageLogo} className="card-img img-fluid" alt="Background" />
+            <div className="card-img-overlay d-flex flex-column justify-content-center align-items-center">
+              <div className="mt-auto mb-1 text-center">
+                <h1 className="card-title">Login</h1>
+                <p className="card-title">Por favor, faça login para acessar.</p>
+                <button className="btn btn-primary mt-1" onClick={handleGoogleLogin}>
+                  <FontAwesomeIcon icon={faGoogle} /> <span style={{fontSize: 'smaller'}}><b style={{color: 'black'}}>Entrar com Google</b></span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
