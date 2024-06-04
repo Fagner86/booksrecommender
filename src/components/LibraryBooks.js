@@ -10,20 +10,42 @@ const LibraryBooks = () => {
   const [bookToShow, setBookToShow] = useState(null);
   const [bookToDelete, setBookToDelete] = useState(null);
   const [confirmText, setConfirmText] = useState('');
+  const [loading, setLoading] = useState(false);
   const user = auth.currentUser;
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await axios.get('https://books-server-6x8r.onrender.com/books');
-        setBooks(response.data);
-      } catch (error) {
-        console.error('Error fetching books:', error);
-      }
-    };
+    const storedBooks = localStorage.getItem('libraryBooks');
+    if (storedBooks) {
+      setBooks(JSON.parse(storedBooks));
+    } else {
+      fetchBooks();
+    }
 
-    fetchBooks();
+    // Adiciona o evento para limpar o localStorage antes de descarregar a página
+    window.addEventListener('beforeunload', clearLocalStorage);
+
+    // Remove o evento quando o componente é desmontado para evitar vazamentos de memória
+    return () => {
+      window.removeEventListener('beforeunload', clearLocalStorage);
+    };
   }, []);
+
+  const clearLocalStorage = () => {
+    localStorage.removeItem('libraryBooks');
+  };
+
+  const fetchBooks = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('https://books-server-6x8r.onrender.com/books');
+      setBooks(response.data);
+      localStorage.setItem('libraryBooks', JSON.stringify(response.data));
+    } catch (error) {
+      console.error('Error fetching books:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleShowModal = (book) => {
     setBookToShow(book);
@@ -42,6 +64,7 @@ const LibraryBooks = () => {
       try {
         await axios.delete(`https://books-server-6x8r.onrender.com/books/${bookToDelete}`);
         setBooks(books.filter(book => book._id !== bookToDelete));
+        localStorage.setItem('libraryBooks', JSON.stringify(books.filter(book => book._id !== bookToDelete)));
         handleCloseModal();
       } catch (error) {
         console.error('Error deleting book:', error);
@@ -53,37 +76,41 @@ const LibraryBooks = () => {
     <div>
       <h2 className="text-center my-4">Livros Disponíveis na Biblioteca</h2>
       <div className="container">
-        <div className="row">
-          {books.map(book => (
-            <div key={book._id} className="col-6 col-md-4 col-lg-3 mb-4">
-              <div className="card h-100 d-flex flex-column">
-                <div className="text-center" style={{ minHeight: '150px' }}>
-                  {book.imageLinks && book.imageLinks.thumbnail ? (
-                    <img src={book.imageLinks.thumbnail} alt={book.title} className="card-img-top img-fluid" />
-                  ) : (
-                    <div className="card-img-top img-fluid bg-secondary text-white d-flex align-items-center justify-content-center" style={{ height: '150px' }}>
-                      Sem imagem
-                    </div>
-                  )}
-                </div>
-                <div className="card-body d-flex flex-column justify-content-between">
-                  <h5 className="card-title">{book.title}</h5>
-                  <button className="btn btn-info w-100 mb-2 mt-auto" onClick={() => handleShowModal(book)}>
-                    Detalhes
-                  </button>
-                  {user && user.email.endsWith('@alu.uern.br') && (
-                    <button className="btn btn-danger w-100" onClick={() => {
-                      setBookToDelete(book._id);
-                      handleShowModal(book);
-                    }}>
-                      Excluir
+        {loading && books.length === 0 ? (
+          <p>Carregando...</p>
+        ) : (
+          <div className="row">
+            {books.map(book => (
+              <div key={book._id} className="col-6 col-md-4 col-lg-3 mb-4">
+                <div className="card h-100 d-flex flex-column">
+                  <div className="text-center" style={{ minHeight: '150px' }}>
+                    {book.imageLinks && book.imageLinks.thumbnail ? (
+                      <img src={book.imageLinks.thumbnail} alt={book.title} className="card-img-top img-fluid" />
+                    ) : (
+                      <div className="card-img-top img-fluid bg-secondary text-white d-flex align-items-center justify-content-center" style={{ height: '150px' }}>
+                        Sem imagem
+                      </div>
+                    )}
+                  </div>
+                  <div className="card-body d-flex flex-column justify-content-between">
+                    <h5 className="card-title">{book.title}</h5>
+                    <button className="btn btn-info w-100 mb-2 mt-auto" onClick={() => handleShowModal(book)}>
+                      Detalhes
                     </button>
-                  )}
+                    {user && user.email.endsWith('@alu.uern.br') && (
+                      <button className="btn btn-danger w-100" onClick={() => {
+                        setBookToDelete(book._id);
+                        handleShowModal(book);
+                      }}>
+                        Excluir
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {bookToShow && (
