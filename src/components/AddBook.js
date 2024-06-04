@@ -45,9 +45,10 @@ function AddBook() {
         const user = auth.currentUser;
         if (user && bookToAdd) {
             const email = user.email;
-            const { title, authors, description, imageLinks, categories } = bookToAdd;
+            const {_id,title, authors, description, imageLinks, categories } = bookToAdd;
             const newBook = {
                 title,
+                refIdBook: _id,
                 author: authors ? authors.join(', ') : 'Desconhecido',
                 description: description || 'Sem descrição',
                 image: imageLinks ? imageLinks.thumbnail : 'Sem imagem',
