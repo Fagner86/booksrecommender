@@ -11,8 +11,26 @@ function BookSuggestions() {
   const [selectedBook, setSelectedBook] = useState(null);
 
   useEffect(() => {
-    fetchSuggestions();
+    // Limpa o localStorage ao recarregar a página para forçar uma nova solicitação
+    window.addEventListener('beforeunload', clearLocalStorage);
+
+    const storedSuggestions = localStorage.getItem('suggestions');
+    if (storedSuggestions) {
+      const suggestionsData = JSON.parse(storedSuggestions);
+      setSuggestions(suggestionsData);
+      fetchAllBookDetails(suggestionsData);
+    } else {
+      fetchSuggestions();
+    }
+
+    return () => {
+      window.removeEventListener('beforeunload', clearLocalStorage);
+    };
   }, []);
+
+  const clearLocalStorage = () => {
+    localStorage.removeItem('suggestions');
+  };
 
   const fetchSuggestions = async () => {
     const user = auth.currentUser;
@@ -21,8 +39,10 @@ function BookSuggestions() {
       setLoading(true);
       try {
         const response = await axios.get(`https://books-server-6x8r.onrender.com/generateRecommendations/${email}`);
-        setSuggestions(response.data.suggestions);
-        fetchAllBookDetails(response.data.suggestions);
+        const suggestionsData = response.data.suggestions;
+        setSuggestions(suggestionsData);
+        localStorage.setItem('suggestions', JSON.stringify(suggestionsData));
+        fetchAllBookDetails(suggestionsData);
       } catch (error) {
         console.error('Erro ao buscar sugestões de livros:', error);
       } finally {
@@ -80,21 +100,23 @@ function BookSuggestions() {
             indicators={true}
             nextIcon={<span className="carousel-control-next-icon" aria-hidden="true" style={{ backgroundColor: 'black' }}></span>}
             prevIcon={<span className="carousel-control-prev-icon" aria-hidden="true" style={{ backgroundColor: 'black' }}></span>}
+            interval={3000}  // Passa automaticamente a cada 3 segundos
           >
             {bookDetails.map((book, index) => (
               <Carousel.Item key={index}>
-                <div className="card h-100 mx-auto" style={{ maxWidth: '300px' }}>
+                <div className="card h-100 mx-auto" style={{ maxWidth: '300px', minHeight: '400px' }}>
                   {renderBookImage(book)}
-                  <div className="card-body d-flex flex-column justify-content-between">
+                  <div className="card-body d-flex flex-column justify-content-start">
                     <h5 className="card-title">{book.title}</h5>
-                    <button className="btn btn-primary mt-auto" onClick={() => showBookDetails(book)}>Detalhes</button>
+                    <button className="btn btn-primary mt-2" onClick={() => showBookDetails(book)}>Detalhes</button>
+                    <div className="mt-4"></div> {/* Espaço vazio abaixo do botão */}
                   </div>
                 </div>
               </Carousel.Item>
             ))}
           </Carousel>
         ) : (
-          <p>Nenhuma recomendação disponível.</p>
+          <p>...</p>
         )}
       </div>
       {selectedBook && (
@@ -113,7 +135,9 @@ function BookSuggestions() {
                     Sem imagem
                   </div>
                 )}
-                <p>{selectedBook.description}</p>
+                <p><strong>Descrição:</strong> {selectedBook.description}</p>
+                <p><strong>Autor:</strong> {selectedBook.authors ? selectedBook.authors.join(', ') : 'N/A'}</p>
+                <p><strong>Gênero:</strong> {selectedBook.categories ? selectedBook.categories.join(', ') : 'N/A'}</p>
               </div>
             </div>
           </div>
