@@ -95,12 +95,16 @@ function BooksRead() {
                 <div className="row">
                     {booksRead.map((book, index) => (
                         <div key={index} className="col-6 col-md-4 col-lg-3 mb-4">
-                            <div className="card h-100">
-                                {renderBookImage(book.image)}
-                                <div className="card-body d-flex flex-column justify-content-between">
+                            <div className="card h-100 d-flex flex-column">
+                                <div className="d-flex flex-column" style={{ minHeight: '150px' }}>
+                                    {renderBookImage(book.image)}
+                                </div>
+                                <div className="card-body d-flex flex-column">
                                     <h5 className="card-title">{book.title}</h5>
-                                    <button className="btn btn-primary mt-auto mb-2" onClick={() => showBookDetails(book)}>Detalhes</button>
-                                    <button className="btn btn-danger mt-auto" onClick={() => handleShowModal(book)}>Excluir</button>
+                                    <div className="mt-auto d-flex flex-column align-items-center">
+                                        <button className="btn btn-info w-100 mb-2" onClick={() => showBookDetails(book)}>Detalhes</button>
+                                        <button className="btn btn-danger w-100" onClick={() => handleShowModal(book)}>Excluir</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -123,7 +127,9 @@ function BooksRead() {
                                         Sem imagem
                                     </div>
                                 )}
-                                <p>{selectedBook.description}</p>
+                                <p><strong>Autor:</strong> {selectedBook.author}</p>
+                                <p><strong>Descrição:</strong> {selectedBook.description}</p>
+                                <p><strong>Gênero:</strong> {selectedBook.genre}</p>
                             </div>
                         </div>
                     </div>
