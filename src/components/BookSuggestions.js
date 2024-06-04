@@ -5,7 +5,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Carousel } from 'react-bootstrap';
 
 function BookSuggestions() {
-  const [suggestions, setSuggestions] = useState([]);
   const [bookDetails, setBookDetails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
@@ -14,11 +13,9 @@ function BookSuggestions() {
     // Limpa o localStorage ao recarregar a página para forçar uma nova solicitação
     window.addEventListener('beforeunload', clearLocalStorage);
 
-    const storedSuggestions = localStorage.getItem('suggestions');
-    if (storedSuggestions) {
-      const suggestionsData = JSON.parse(storedSuggestions);
-      setSuggestions(suggestionsData);
-      fetchAllBookDetails(suggestionsData);
+    const storedBookDetails = localStorage.getItem('bookDetails');
+    if (storedBookDetails) {
+      setBookDetails(JSON.parse(storedBookDetails));
     } else {
       fetchSuggestions();
     }
@@ -29,7 +26,7 @@ function BookSuggestions() {
   }, []);
 
   const clearLocalStorage = () => {
-    localStorage.removeItem('suggestions');
+    localStorage.removeItem('bookDetails');
   };
 
   const fetchSuggestions = async () => {
@@ -40,8 +37,6 @@ function BookSuggestions() {
       try {
         const response = await axios.get(`https://books-server-6x8r.onrender.com/generateRecommendations/${email}`);
         const suggestionsData = response.data.suggestions;
-        setSuggestions(suggestionsData);
-        localStorage.setItem('suggestions', JSON.stringify(suggestionsData));
         fetchAllBookDetails(suggestionsData);
       } catch (error) {
         console.error('Erro ao buscar sugestões de livros:', error);
@@ -57,6 +52,7 @@ function BookSuggestions() {
     const promises = titles.map(title => fetchBookDetails(title));
     const books = await Promise.all(promises);
     setBookDetails(books.filter(book => book !== null));
+    localStorage.setItem('bookDetails', JSON.stringify(books.filter(book => book !== null)));
   };
 
   const fetchBookDetails = async (title) => {
@@ -116,7 +112,7 @@ function BookSuggestions() {
             ))}
           </Carousel>
         ) : (
-          <p>...</p>
+          <p>{!loading && 'Nenhuma sugestão disponível'}</p>
         )}
       </div>
       {selectedBook && (
