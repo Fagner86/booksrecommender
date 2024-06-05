@@ -3,6 +3,7 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { auth } from '../config/firebase';
 import { Modal, Button, Form } from 'react-bootstrap';
+
 const LibraryBooks = () => {
   const [books, setBooks] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -15,30 +16,25 @@ const LibraryBooks = () => {
   const user = auth.currentUser;
 
   useEffect(() => {
+    console.log('useEffect triggered');
     const storedBooks = localStorage.getItem('libraryBooks');
     if (storedBooks) {
+      console.log('Books found in localStorage');
       setBooks(JSON.parse(storedBooks));
     } else {
+      console.log('No books in localStorage, fetching from server');
       fetchBooks();
     }
 
     const storedClusters = localStorage.getItem('libraryClusters');
     if (storedClusters) {
+      console.log('Clusters found in localStorage');
       setClusters(JSON.parse(storedClusters));
     } else {
+      console.log('No clusters in localStorage, fetching from server');
       fetchClusters();
     }
-
-    window.addEventListener('beforeunload', clearLocalStorage);
-    return () => {
-      window.removeEventListener('beforeunload', clearLocalStorage);
-    };
   }, []);
-
-  const clearLocalStorage = () => {
-    localStorage.removeItem('libraryBooks');
-    localStorage.removeItem('libraryClusters');
-  };
 
   const fetchBooks = async () => {
     setLoading(true);
@@ -46,6 +42,7 @@ const LibraryBooks = () => {
       const response = await axios.get('https://books-server-6x8r.onrender.com/books');
       setBooks(response.data);
       localStorage.setItem('libraryBooks', JSON.stringify(response.data));
+      console.log('Books fetched and stored in localStorage');
       if (Object.keys(clusters).length === 0) {
         fetchClusters();
       }
@@ -62,6 +59,7 @@ const LibraryBooks = () => {
       const clustersData = response.data;
       setClusters(clustersData);
       localStorage.setItem('libraryClusters', JSON.stringify(clustersData));
+      console.log('Clusters fetched and stored in localStorage');
     } catch (error) {
       console.error('Error fetching clusters:', error);
     }
@@ -83,8 +81,9 @@ const LibraryBooks = () => {
     if (confirmText.toLowerCase() === 'sim' && bookToDelete) {
       try {
         await axios.delete(`https://books-server-6x8r.onrender.com/books/${bookToDelete}`);
-        setBooks(books.filter(book => book._id !== bookToDelete));
-        localStorage.setItem('libraryBooks', JSON.stringify(books.filter(book => book._id !== bookToDelete)));
+        const updatedBooks = books.filter(book => book._id !== bookToDelete);
+        setBooks(updatedBooks);
+        localStorage.setItem('libraryBooks', JSON.stringify(updatedBooks));
         handleCloseModal();
       } catch (error) {
         console.error('Error deleting book:', error);
@@ -192,7 +191,7 @@ const LibraryBooks = () => {
       </Modal>
     )}
     </div>
-    
   );
 };
+
 export default LibraryBooks;
