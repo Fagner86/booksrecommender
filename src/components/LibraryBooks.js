@@ -3,7 +3,6 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { auth } from '../config/firebase';
 import { Modal, Button, Form } from 'react-bootstrap';
-
 const LibraryBooks = () => {
   const [books, setBooks] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -93,14 +92,12 @@ const LibraryBooks = () => {
     }
   };
 
- 
- 
   const handleClusterSelect = (event) => {
     const selectedValue = event.target.value;
     setSelectedCluster(selectedValue === "null" ? null : selectedValue);
   };
 
-  const filteredBooks = selectedCluster !== null ? clusters[selectedCluster] || [] : books.map(book => book.title);
+  const filteredBooks = selectedCluster !== null ? clusters[selectedCluster] || [] : books.map(book => book._id);
 
   return (
     <div>
@@ -112,14 +109,14 @@ const LibraryBooks = () => {
           <>
             <Form.Select onChange={handleClusterSelect} className="mb-4">
               <option value="null">Todos os Livros</option>
-              {Object.entries(clusters).map(([clusterName, books]) => (
+              {Object.entries(clusters).map(([clusterName, bookIds]) => (
                 <option key={clusterName} value={clusterName}>{clusterName}</option>
               ))}
             </Form.Select>
 
             <div className="row">
-              {filteredBooks.map((bookTitle, index) => {
-                const book = books.find(b => b.title === bookTitle);
+              {filteredBooks.map((bookId, index) => {
+                const book = books.find(b => b._id === bookId);
                 return (
                   <div key={book._id} className="col-6 col-md-4 col-lg-3 mb-4">
                     <div className="card h-100 d-flex flex-column">
@@ -154,49 +151,48 @@ const LibraryBooks = () => {
           </>
         )}
       </div>
-
       {bookToShow && (
-        <Modal show={showModal} onHide={handleCloseModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>{bookToDelete ? 'Confirmar Exclusão' : 'Detalhes do Livro'}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {bookToDelete ? (
-              <>
-                <p>Tem certeza que deseja excluir este livro? Digite <strong>sim</strong> para confirmar:</p>
-                <Form.Control
-                  type="text"
-                  value={confirmText}
-                  onChange={(e) => setConfirmText(e.target.value)}
-                  placeholder="Digite 'sim' para confirmar"
-                />
-              </>
-            ) : (
-              <>
-                <div className="text-center mb-3">
-                  <img src={bookToShow.imageLinks?.thumbnail} alt={bookToShow.title} className="img-fluid" style={{ width: '100px', height: 'auto' }} />
-                </div>
-                <p><strong>Título:</strong> {bookToShow.title}</p>
-                <p><strong>Autor:</strong> {bookToShow.authors ? bookToShow.authors.join(', ') : 'Desconhecido'}</p>
-                <p><strong>Descrição:</strong> {bookToShow.description || 'Sem descrição'}</p>
-                <p><strong>Gênero:</strong> {bookToShow.categories ? bookToShow.categories.join(', ') : 'Desconhecido'}</p>
-              </>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              {bookToDelete ? 'Cancelar' : 'Fechar'}
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>{bookToDelete ? 'Confirmar Exclusão' : 'Detalhes do Livro'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {bookToDelete ? (
+            <>
+              <p>Tem certeza que deseja excluir este livro? Digite <strong>sim</strong> para confirmar:</p>
+              <Form.Control
+                type="text"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder="Digite 'sim' para confirmar"
+              />
+            </>
+          ) : (
+            <>
+              <div className="text-center mb-3">
+                <img src={bookToShow.imageLinks?.thumbnail} alt={bookToShow.title} className="img-fluid" style={{ width: '100px', height: 'auto' }} />
+              </div>
+              <p><strong>Título:</strong> {bookToShow.title}</p>
+              <p><strong>Autor:</strong> {bookToShow.authors ? bookToShow.authors.join(', ') : 'Desconhecido'}</p>
+              <p><strong>Descrição:</strong> {bookToShow.description || 'Sem descrição'}</p>
+              <p><strong>Gênero:</strong> {bookToShow.categories ? bookToShow.categories.join(', ') : 'Desconhecido'}</p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            {bookToDelete ? 'Cancelar' : 'Fechar'}
+          </Button>
+          {bookToDelete && (
+            <Button variant="danger" onClick={handleDeleteBook} disabled={confirmText.toLowerCase() !== 'sim'}>
+              Excluir
             </Button>
-            {bookToDelete && (
-              <Button variant="danger" onClick={handleDeleteBook} disabled={confirmText.toLowerCase() !== 'sim'}>
-                Excluir
-              </Button>
-            )}
-          </Modal.Footer>
-        </Modal>
-      )}
+          )}
+        </Modal.Footer>
+      </Modal>
+    )}
     </div>
+    
   );
 };
-
 export default LibraryBooks;
