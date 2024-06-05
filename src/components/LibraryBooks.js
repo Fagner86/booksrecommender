@@ -15,25 +15,20 @@ const LibraryBooks = () => {
   const [selectedCluster, setSelectedCluster] = useState(null);
   const user = auth.currentUser;
 
+  // Função para limpar o localStorage
+  const clearLocalStorage = () => {
+    localStorage.removeItem('libraryBooks');
+    localStorage.removeItem('libraryClusters');
+  };
+
+  // Carrega os dados ao montar o componente
   useEffect(() => {
-    const storedBooks = localStorage.getItem('libraryBooks');
-    const storedClusters = localStorage.getItem('libraryClusters');
+    // Limpar o localStorage antes de carregar novos dados
+    clearLocalStorage();
 
-    if (storedBooks) {
-      console.log('Books found in localStorage');
-      setBooks(JSON.parse(storedBooks));
-    } else {
-      console.log('No books in localStorage, fetching from server');
-      fetchBooks();
-    }
-
-    if (storedClusters) {
-      console.log('Clusters found in localStorage');
-      setClusters(JSON.parse(storedClusters));
-    } else {
-      console.log('No clusters in localStorage, fetching from server');
-      fetchClusters();
-    }
+    // Buscar novos dados do servidor
+    fetchBooks();
+    fetchClusters();
   }, []);
 
   const fetchBooks = async () => {
@@ -93,6 +88,7 @@ const LibraryBooks = () => {
     setSelectedCluster(selectedValue === "null" ? null : selectedValue);
   };
 
+  // Filtra os livros com base no cluster selecionado
   const filteredBooks = selectedCluster !== null ? clusters[selectedCluster] || [] : books.map(book => book._id);
 
   return (
