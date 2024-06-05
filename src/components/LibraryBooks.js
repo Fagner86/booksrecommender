@@ -24,8 +24,8 @@ const LibraryBooks = () => {
 
   // Carrega os dados ao montar o componente
   useEffect(() => {
-    // Adiciona o evento pageshow
-    window.addEventListener('pageshow', clearSessionStorage);
+    // Adiciona o evento load
+    window.addEventListener('load', clearSessionStorage);
 
     // Verifica se os dados já foram buscados
     const dataFetched = sessionStorage.getItem('dataFetched');
@@ -41,9 +41,9 @@ const LibraryBooks = () => {
       if (storedClusters) setClusters(storedClusters);
     }
 
-    // Remove o evento pageshow ao desmontar o componente
+    // Remove o evento load ao desmontar o componente
     return () => {
-      window.removeEventListener('pageshow', clearSessionStorage);
+      window.removeEventListener('load', clearSessionStorage);
     };
   }, []);
 
