@@ -92,6 +92,7 @@ function App() {
                   path="/"
                   element={user.email.endsWith('@alu.uern.br') ? <LibraryBooks /> : <Home user={user} />}
                 />
+                <Route path="*" element={<Home user={user} />} />
               </Routes>
             </div>
           </div>
