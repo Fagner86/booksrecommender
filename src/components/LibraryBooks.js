@@ -15,22 +15,12 @@ const LibraryBooks = () => {
   const [selectedCluster, setSelectedCluster] = useState(null);
   const user = auth.currentUser;
 
-  // Função para limpar o sessionStorage
-  const clearSessionStorage = () => {
-    sessionStorage.removeItem('libraryBooks');
-    sessionStorage.removeItem('libraryClusters');
-    sessionStorage.removeItem('dataFetched');
-  };
-
   // Carrega os dados ao montar o componente
   useEffect(() => {
-    // Limpa o sessionStorage quando o componente é montado
-    clearSessionStorage();
-
     // Verifica se os dados já foram buscados
     const dataFetched = sessionStorage.getItem('dataFetched');
 
-    if (!dataFetched) {
+    if (!dataFetched || performance.navigation.type === 1) { // performance.navigation.type === 1 indica que a página foi recarregada
       fetchBooks();
       fetchClusters();
       sessionStorage.setItem('dataFetched', 'true');
@@ -41,10 +31,6 @@ const LibraryBooks = () => {
       if (storedClusters) setClusters(storedClusters);
     }
 
-    // Remove o evento beforeunload ao desmontar o componente
-    return () => {
-      clearSessionStorage();
-    };
   }, []);
 
   const fetchBooks = async () => {
