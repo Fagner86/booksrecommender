@@ -8,23 +8,19 @@ function BookSuggestions() {
   const [bookDetails, setBookDetails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
-
+  
   useEffect(() => {
-    // Limpa o localStorage ao recarregar a página para forçar uma nova solicitação
-    window.addEventListener('beforeunload', clearLocalStorage);
-
+    // Limpa o localStorage ao carregar a página
+    clearLocalStorage();
+  
     const storedBookDetails = localStorage.getItem('bookDetails');
     if (storedBookDetails) {
       setBookDetails(JSON.parse(storedBookDetails));
     } else {
       fetchSuggestions();
     }
-
-    return () => {
-      window.removeEventListener('beforeunload', clearLocalStorage);
-    };
   }, []);
-
+  
   const clearLocalStorage = () => {
     localStorage.removeItem('bookDetails');
   };
