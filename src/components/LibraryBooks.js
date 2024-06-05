@@ -15,20 +15,36 @@ const LibraryBooks = () => {
   const [selectedCluster, setSelectedCluster] = useState(null);
   const user = auth.currentUser;
 
-  // Função para limpar o localStorage
-  const clearLocalStorage = () => {
-    localStorage.removeItem('libraryBooks');
-    localStorage.removeItem('libraryClusters');
+  // Função para limpar o sessionStorage
+  const clearSessionStorage = () => {
+    sessionStorage.removeItem('libraryBooks');
+    sessionStorage.removeItem('libraryClusters');
+    sessionStorage.removeItem('dataFetched');
   };
 
   // Carrega os dados ao montar o componente
   useEffect(() => {
-    // Limpar o localStorage antes de carregar novos dados
-    clearLocalStorage();
+    // Adiciona o evento beforeunload
+    window.addEventListener('beforeunload', clearSessionStorage);
 
-    // Buscar novos dados do servidor
-    fetchBooks();
-    fetchClusters();
+    // Verifica se os dados já foram buscados
+    const dataFetched = sessionStorage.getItem('dataFetched');
+
+    if (!dataFetched) {
+      fetchBooks();
+      fetchClusters();
+      sessionStorage.setItem('dataFetched', 'true');
+    } else {
+      const storedBooks = JSON.parse(sessionStorage.getItem('libraryBooks'));
+      const storedClusters = JSON.parse(sessionStorage.getItem('libraryClusters'));
+      if (storedBooks) setBooks(storedBooks);
+      if (storedClusters) setClusters(storedClusters);
+    }
+
+    // Remove o evento beforeunload ao desmontar o componente
+    return () => {
+      window.removeEventListener('beforeunload', clearSessionStorage);
+    };
   }, []);
 
   const fetchBooks = async () => {
@@ -36,8 +52,8 @@ const LibraryBooks = () => {
     try {
       const response = await axios.get('https://books-server-6x8r.onrender.com/books');
       setBooks(response.data);
-      localStorage.setItem('libraryBooks', JSON.stringify(response.data));
-      console.log('Books fetched and stored in localStorage');
+      sessionStorage.setItem('libraryBooks', JSON.stringify(response.data));
+      console.log('Books fetched and stored in sessionStorage');
     } catch (error) {
       console.error('Error fetching books:', error);
     } finally {
@@ -50,8 +66,8 @@ const LibraryBooks = () => {
       const response = await axios.get('https://books-server-6x8r.onrender.com/clusterBooks');
       const clustersData = response.data;
       setClusters(clustersData);
-      localStorage.setItem('libraryClusters', JSON.stringify(clustersData));
-      console.log('Clusters fetched and stored in localStorage');
+      sessionStorage.setItem('libraryClusters', JSON.stringify(clustersData));
+      console.log('Clusters fetched and stored in sessionStorage');
     } catch (error) {
       console.error('Error fetching clusters:', error);
     }
@@ -75,7 +91,7 @@ const LibraryBooks = () => {
         await axios.delete(`https://books-server-6x8r.onrender.com/books/${bookToDelete}`);
         const updatedBooks = books.filter(book => book._id !== bookToDelete);
         setBooks(updatedBooks);
-        localStorage.setItem('libraryBooks', JSON.stringify(updatedBooks));
+        sessionStorage.setItem('libraryBooks', JSON.stringify(updatedBooks));
         handleCloseModal();
       } catch (error) {
         console.error('Error deleting book:', error);
