@@ -45,7 +45,7 @@ function AddBook() {
         const user = auth.currentUser;
         if (user && bookToAdd) {
             const email = user.email;
-            const {_id,title, authors, description, imageLinks, categories } = bookToAdd;
+            const { _id, title, authors, description, imageLinks, categories } = bookToAdd;
             const newBook = {
                 title,
                 refIdBook: _id,
@@ -114,7 +114,12 @@ function AddBook() {
                                     {searchResults.map((book, index) => (
                                         <tr key={index}>
                                             <td className="text-center">
-                                                <img src={book.imageLinks?.thumbnail} alt={book.title} className="img-fluid" style={{ width: '50px', height: 'auto' }} />
+                                                <img
+                                                    src={book.imageLinks?.thumbnail}
+                                                    alt={book.title}
+                                                    className="img-fluid"
+                                                    style={{ maxWidth: '50px', height: 'auto' }}
+                                                />
                                             </td>
                                             <td>{book.title}</td>
                                             <td>{book.authors ? book.authors.join(', ') : 'Desconhecido'}</td>
@@ -135,7 +140,6 @@ function AddBook() {
                         </div>
                     </div>
                 )}
-
                 {selectedBook && (
                     <div className="mt-4">
                         <h4>Livro Marcado como Lido:</h4>
