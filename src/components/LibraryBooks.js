@@ -11,6 +11,8 @@ const LibraryBooks = () => {
   const [bookToDelete, setBookToDelete] = useState(null);
   const [confirmText, setConfirmText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [clusters, setClusters] = useState({});
+  const [selectedCluster, setSelectedCluster] = useState(null);
   const user = auth.currentUser;
 
   useEffect(() => {
@@ -21,10 +23,14 @@ const LibraryBooks = () => {
       fetchBooks();
     }
 
-    // Adiciona o evento para limpar o localStorage antes de descarregar a página
-    window.addEventListener('beforeunload', clearLocalStorage);
+    const storedClusters = localStorage.getItem('libraryClusters');
+    if (storedClusters) {
+      setClusters(JSON.parse(storedClusters));
+    } else {
+      fetchClusters();
+    }
 
-    // Remove o evento quando o componente é desmontado para evitar vazamentos de memória
+    window.addEventListener('beforeunload', clearLocalStorage);
     return () => {
       window.removeEventListener('beforeunload', clearLocalStorage);
     };
@@ -32,6 +38,7 @@ const LibraryBooks = () => {
 
   const clearLocalStorage = () => {
     localStorage.removeItem('libraryBooks');
+    localStorage.removeItem('libraryClusters');
   };
 
   const fetchBooks = async () => {
@@ -40,10 +47,24 @@ const LibraryBooks = () => {
       const response = await axios.get('https://books-server-6x8r.onrender.com/books');
       setBooks(response.data);
       localStorage.setItem('libraryBooks', JSON.stringify(response.data));
+      if (Object.keys(clusters).length === 0) {
+        fetchClusters();
+      }
     } catch (error) {
       console.error('Error fetching books:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchClusters = async () => {
+    try {
+      const response = await axios.get('https://books-server-6x8r.onrender.com/clusterBooks');
+      const clustersData = response.data;
+      setClusters(clustersData);
+      localStorage.setItem('libraryClusters', JSON.stringify(clustersData));
+    } catch (error) {
+      console.error('Error fetching clusters:', error);
     }
   };
 
@@ -72,44 +93,65 @@ const LibraryBooks = () => {
     }
   };
 
+ 
+ 
+  const handleClusterSelect = (event) => {
+    const selectedValue = event.target.value;
+    setSelectedCluster(selectedValue === "null" ? null : selectedValue);
+  };
+
+  const filteredBooks = selectedCluster !== null ? clusters[selectedCluster] || [] : books.map(book => book.title);
+
   return (
     <div>
       <h2 className="text-center my-4">Livros Disponíveis na Biblioteca</h2>
       <div className="container">
-        {loading && books.length === 0 ? (
+        {loading ? (
           <p>Carregando...</p>
         ) : (
-          <div className="row">
-            {books.map(book => (
-              <div key={book._id} className="col-6 col-md-4 col-lg-3 mb-4">
-                <div className="card h-100 d-flex flex-column">
-                  <div className="text-center" style={{ minHeight: '150px' }}>
-                    {book.imageLinks && book.imageLinks.thumbnail ? (
-                      <img src={book.imageLinks.thumbnail} alt={book.title} className="card-img-top img-fluid" />
-                    ) : (
-                      <div className="card-img-top img-fluid bg-secondary text-white d-flex align-items-center justify-content-center" style={{ height: '150px' }}>
-                        Sem imagem
+          <>
+            <Form.Select onChange={handleClusterSelect} className="mb-4">
+              <option value="null">Todos os Livros</option>
+              {Object.entries(clusters).map(([clusterName, books]) => (
+                <option key={clusterName} value={clusterName}>{clusterName}</option>
+              ))}
+            </Form.Select>
+
+            <div className="row">
+              {filteredBooks.map((bookTitle, index) => {
+                const book = books.find(b => b.title === bookTitle);
+                return (
+                  <div key={book._id} className="col-6 col-md-4 col-lg-3 mb-4">
+                    <div className="card h-100 d-flex flex-column">
+                      <div className="text-center" style={{ minHeight: '150px' }}>
+                        {book.imageLinks && book.imageLinks?.thumbnail ? (
+                          <img src={book.imageLinks?.thumbnail} alt={book.title} className="card-img-top img-fluid" />
+                        ) : (
+                          <div className="card-img-top img-fluid bg-secondary text-white d-flex align-items-center justify-content-center" style={{ height: '150px' }}>
+                            Sem imagem
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <div className="card-body d-flex flex-column justify-content-between">
+                        <h5 className="card-title">{book.title}</h5>
+                        <button className="btn btn-info w-100 mb-2 mt-auto" onClick={() => handleShowModal(book)}>
+                          Detalhes
+                        </button>
+                        {user && user.email.endsWith('@alu.uern.br') && (
+                          <button className="btn btn-danger w-100" onClick={() => {
+                            setBookToDelete(book._id);
+                            handleShowModal(book);
+                          }}>
+                            Excluir
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="card-body d-flex flex-column justify-content-between">
-                    <h5 className="card-title">{book.title}</h5>
-                    <button className="btn btn-info w-100 mb-2 mt-auto" onClick={() => handleShowModal(book)}>
-                      Detalhes
-                    </button>
-                    {user && user.email.endsWith('@alu.uern.br') && (
-                      <button className="btn btn-danger w-100" onClick={() => {
-                        setBookToDelete(book._id);
-                        handleShowModal(book);
-                      }}>
-                        Excluir
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 
@@ -122,11 +164,11 @@ const LibraryBooks = () => {
             {bookToDelete ? (
               <>
                 <p>Tem certeza que deseja excluir este livro? Digite <strong>sim</strong> para confirmar:</p>
-                <Form.Control 
-                  type="text" 
-                  value={confirmText} 
-                  onChange={(e) => setConfirmText(e.target.value)} 
-                  placeholder="Digite 'sim' para confirmar" 
+                <Form.Control
+                  type="text"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="Digite 'sim' para confirmar"
                 />
               </>
             ) : (

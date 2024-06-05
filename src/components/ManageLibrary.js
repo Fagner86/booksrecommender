@@ -28,7 +28,7 @@ function ManageLibrary() {
     };
     try {
       // Faz a requisição POST para adicionar o livro ao acervo
-      const response = await axios.post('http://localhost:4000/books', book);
+      const response = await axios.post('https://books-server-6x8r.onrender.com/books', book);
       console.log('Livro adicionado com sucesso:', response.data);
       setSelectedBook(newBook);
       setGoogleBooksData([]);
