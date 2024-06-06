@@ -11,18 +11,10 @@ function BookSuggestions() {
 
   useEffect(() => {
     const storedBookDetails = sessionStorage.getItem('bookDetails');
-    const lastFetched = sessionStorage.getItem('lastFetchedSuggestions');
-
-    const shouldFetchNewData = !lastFetched || (Date.now() - new Date(lastFetched)) > 60000; // 1 minute for example
-
-    if (storedBookDetails && !shouldFetchNewData) {
+    if (storedBookDetails) {
       setBookDetails(JSON.parse(storedBookDetails));
     } else {
       fetchSuggestions();
-    }
-
-    if (shouldFetchNewData) {
-      sessionStorage.setItem('lastFetchedSuggestions', new Date().toISOString());
     }
   }, []);
 
