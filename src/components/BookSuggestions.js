@@ -8,15 +8,22 @@ function BookSuggestions() {
   const [bookDetails, setBookDetails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
-
+  
   useEffect(() => {
-    const storedBookDetails = sessionStorage.getItem('bookDetails');
+    // Limpa o localStorage ao carregar a página
+    clearLocalStorage();
+  
+    const storedBookDetails = localStorage.getItem('bookDetails');
     if (storedBookDetails) {
       setBookDetails(JSON.parse(storedBookDetails));
     } else {
       fetchSuggestions();
     }
   }, []);
+  
+  const clearLocalStorage = () => {
+    localStorage.removeItem('bookDetails');
+  };
 
   const fetchSuggestions = async () => {
     const user = auth.currentUser;
@@ -40,9 +47,8 @@ function BookSuggestions() {
   const fetchAllBookDetails = async (titles) => {
     const promises = titles.map(title => fetchBookDetails(title));
     const books = await Promise.all(promises);
-    const validBooks = books.filter(book => book !== null);
-    setBookDetails(validBooks);
-    sessionStorage.setItem('bookDetails', JSON.stringify(validBooks));
+    setBookDetails(books.filter(book => book !== null));
+    localStorage.setItem('bookDetails', JSON.stringify(books.filter(book => book !== null)));
   };
 
   const fetchBookDetails = async (title) => {
