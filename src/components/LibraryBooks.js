@@ -15,12 +15,9 @@ const LibraryBooks = () => {
   const [selectedCluster, setSelectedCluster] = useState(null);
   const user = auth.currentUser;
 
-  // Carrega os dados ao montar o componente
   useEffect(() => {
-    // Verifica se os dados já foram buscados
     const dataFetched = sessionStorage.getItem('dataFetched');
-
-    if (!dataFetched || performance.navigation.type === 1) { // performance.navigation.type === 1 indica que a página foi recarregada
+    if (!dataFetched) {
       fetchBooks();
       fetchClusters();
       sessionStorage.setItem('dataFetched', 'true');
@@ -30,7 +27,6 @@ const LibraryBooks = () => {
       if (storedBooks) setBooks(storedBooks);
       if (storedClusters) setClusters(storedClusters);
     }
-
   }, []);
 
   const fetchBooks = async () => {
