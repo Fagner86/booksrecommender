@@ -20,7 +20,7 @@ const LibraryBooks = () => {
     const storedClusters = sessionStorage.getItem('libraryClusters');
     const lastFetched = sessionStorage.getItem('lastFetched');
 
-    const shouldFetchNewData = !lastFetched || (Date.now() - new Date(lastFetched)) > 60000; // 1 minute for example
+    const shouldFetchNewData = !lastFetched || (Date.now() - new Date(lastFetched));
 
     if (storedBooks && !shouldFetchNewData) {
       setBooks(JSON.parse(storedBooks));
