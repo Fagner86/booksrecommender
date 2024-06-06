@@ -16,17 +16,8 @@ const LibraryBooks = () => {
   const user = auth.currentUser;
 
   useEffect(() => {
-    const dataFetched = sessionStorage.getItem('dataFetched');
-    if (!dataFetched) {
-      fetchBooks();
-      fetchClusters();
-      sessionStorage.setItem('dataFetched', 'true');
-    } else {
-      const storedBooks = JSON.parse(sessionStorage.getItem('libraryBooks'));
-      const storedClusters = JSON.parse(sessionStorage.getItem('libraryClusters'));
-      if (storedBooks) setBooks(storedBooks);
-      if (storedClusters) setClusters(storedClusters);
-    }
+    fetchBooks();
+    fetchClusters();
   }, []);
 
   const fetchBooks = async () => {
@@ -86,7 +77,6 @@ const LibraryBooks = () => {
     setSelectedCluster(selectedValue === "null" ? null : selectedValue);
   };
 
-  // Filtra os livros com base no cluster selecionado
   const filteredBooks = selectedCluster !== null ? clusters[selectedCluster] || [] : books.map(book => book._id);
 
   return (
