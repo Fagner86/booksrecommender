@@ -16,8 +16,20 @@ const LibraryBooks = () => {
   const user = auth.currentUser;
 
   useEffect(() => {
-    fetchBooks();
-    fetchClusters();
+    const storedBooks = sessionStorage.getItem('libraryBooks');
+    const storedClusters = sessionStorage.getItem('libraryClusters');
+
+    if (storedBooks) {
+      setBooks(JSON.parse(storedBooks));
+    } else {
+      fetchBooks();
+    }
+
+    if (storedClusters) {
+      setClusters(JSON.parse(storedClusters));
+    } else {
+      fetchClusters();
+    }
   }, []);
 
   const fetchBooks = async () => {
