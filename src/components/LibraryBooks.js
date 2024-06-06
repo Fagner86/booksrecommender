@@ -18,17 +18,24 @@ const LibraryBooks = () => {
   useEffect(() => {
     const storedBooks = sessionStorage.getItem('libraryBooks');
     const storedClusters = sessionStorage.getItem('libraryClusters');
+    const lastFetched = sessionStorage.getItem('lastFetched');
 
-    if (storedBooks) {
+    const shouldFetchNewData = !lastFetched || (Date.now() - new Date(lastFetched)) > 60000; // 1 minute for example
+
+    if (storedBooks && !shouldFetchNewData) {
       setBooks(JSON.parse(storedBooks));
     } else {
       fetchBooks();
     }
 
-    if (storedClusters) {
+    if (storedClusters && !shouldFetchNewData) {
       setClusters(JSON.parse(storedClusters));
     } else {
       fetchClusters();
+    }
+
+    if (shouldFetchNewData) {
+      sessionStorage.setItem('lastFetched', new Date().toISOString());
     }
   }, []);
 
