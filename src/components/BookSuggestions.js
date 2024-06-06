@@ -8,22 +8,23 @@ function BookSuggestions() {
   const [bookDetails, setBookDetails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
-  
+
   useEffect(() => {
-    // Limpa o localStorage ao carregar a página
-    clearLocalStorage();
-  
-    const storedBookDetails = localStorage.getItem('bookDetails');
-    if (storedBookDetails) {
+    const storedBookDetails = sessionStorage.getItem('bookDetails');
+    const lastFetched = sessionStorage.getItem('lastFetchedSuggestions');
+
+    const shouldFetchNewData = !lastFetched || (Date.now() - new Date(lastFetched)) > 60000; // 1 minute for example
+
+    if (storedBookDetails && !shouldFetchNewData) {
       setBookDetails(JSON.parse(storedBookDetails));
     } else {
       fetchSuggestions();
     }
+
+    if (shouldFetchNewData) {
+      sessionStorage.setItem('lastFetchedSuggestions', new Date().toISOString());
+    }
   }, []);
-  
-  const clearLocalStorage = () => {
-    localStorage.removeItem('bookDetails');
-  };
 
   const fetchSuggestions = async () => {
     const user = auth.currentUser;
@@ -47,8 +48,9 @@ function BookSuggestions() {
   const fetchAllBookDetails = async (titles) => {
     const promises = titles.map(title => fetchBookDetails(title));
     const books = await Promise.all(promises);
-    setBookDetails(books.filter(book => book !== null));
-    localStorage.setItem('bookDetails', JSON.stringify(books.filter(book => book !== null)));
+    const validBooks = books.filter(book => book !== null);
+    setBookDetails(validBooks);
+    sessionStorage.setItem('bookDetails', JSON.stringify(validBooks));
   };
 
   const fetchBookDetails = async (title) => {
